@@ -4,9 +4,10 @@ clear; close all; clc;
 
 %% 実験条件設定
 % パラメータ
-initial_position = [2 1.5].';
-initial_speed = [-0.05 0].';
-delta_t = 0.1;
+position_1 = [2 1.5].';
+speed_1 = [-0.05 0].';
+time = 0;
+delta_t = 0.01;
 max_t = 100;
 epsilon = 1/48;
 sigma = 1;
@@ -21,22 +22,19 @@ excel_file_path = out_dir_path + excel_file_name; % エクセルファイルの�
 
 %% シミュレーション
 cnt = 1;
-time = 0;
-position_n = initial_position;
-speed_n = initial_speed;
 position_2 = [0 0].';
 while time <= max_t
     % record
-    res(:,cnt) = position_n;
+    res(:,cnt) = position_1;
 
     % calc force of particle1
-    F1 = calc_F1(position_n, position_2, epsilon, sigma);
+    F1 = calc_F1(position_1, position_2, sigma, epsilon);
 
     % parameter updates
     cnt = cnt + 1;
     time = time + delta_t;
-    position_n = position_n + speed_n * delta_t;
-    speed_n = speed_n + F1 * delta_t;
+    position_1 = position_1 + speed_1 * delta_t;
+    speed_1 = speed_1 + F1 * delta_t;
 end
 
 
@@ -46,7 +44,13 @@ f.Position = [0 0 1200 800];
 f = plot(res(1, :), res(2, :), "Marker", "o", "MarkerSize", 3);
 ax = gca;
 ax.FontSize = 12;
-title('Line Plot of projectile motion with initial values \epsilon = 1 and \sigma = 1 ', FontSize=20)
+title_name = sprintf('Line Plot of projectile motion');
+ep = "\epsilon";
+sg = "\sigma";
+sub_title_name = sprintf('%s = %f, %s = %f', ep, epsilon, sg, sigma);
+[t, s] = title(title_name, sub_title_name);
+t.FontSize = 20;
+s.FontSize = 16; s.FontAngle = 'italic';
 xlabel('Position of the mass point1 [m] (x coordinate)', FontSize=18) 
 ylabel('Position of the mass point1 [m] (y coordinate)', FontSize=18) 
 
@@ -65,7 +69,7 @@ end
 
 %-----------------------------------------------------------------
 % Local function
-function F1 = calc_F1(pos1, pos2, epsilon, sigma)
+function F1 = calc_F1(pos1, pos2, sigma, epsilon)
     pos_vector = pos1 - pos2;
     pos_norm = norm(pos_vector);
     norm6 = (sigma / pos_norm) ^ 6;
